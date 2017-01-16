@@ -140,12 +140,18 @@ generate_mail_body() {
 	cat $LOG_FILE
 }
 
+create_remote_d2d_repo() {
+	ssh_execute "mkdir -p ${REMOTE_BACKUP_DIR}"
+}
+
 main() {
 	# reset or create log file
 	: > $LOG_FILE
 
 	{
 		echo "Backup started"	
+		
+		create_remote_d2d_repo
 		
 		save_mysql
 
