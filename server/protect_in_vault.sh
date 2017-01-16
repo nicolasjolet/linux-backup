@@ -87,8 +87,8 @@ is_dir_empty() {
 
 #1: path to process
 save_to_vault() {
-	local d2d_path="$ROOT_BACKUP_DIR/$1/$D2D_DIR_NAME"
-	local vault_path="$ROOT_BACKUP_DIR/$1/$VAULT_DIR_NAME"
+	local d2d_path="$ROOT_BACKUP_DIR/$D2D_DIR_NAME/$1"
+	local vault_path="$ROOT_BACKUP_DIR/$VAULT_DIR_NAME/$1"
 	
 	echo "saving $d2d_path"
 	echo "to $vault_path"
@@ -116,7 +116,7 @@ save_to_vault() {
 
 #1: path to process
 housekeeping() {
-	local vault_path="$ROOT_BACKUP_DIR/$1/$VAULT_DIR_NAME"
+	local vault_path="$ROOT_BACKUP_DIR/$VAULT_DIR_NAME/$1"
 	
 	echo "housekeeping on $vault_path"
 	
