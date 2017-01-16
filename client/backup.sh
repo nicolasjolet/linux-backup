@@ -143,6 +143,7 @@ generate_mail_body() {
 create_remote_d2d_repo() {
 	ssh_execute "mkdir -p ${REMOTE_BACKUP_DIR}"
 	ssh_execute "chmod -R 660 ${REMOTE_BACKUP_DIR}"
+	ssh_execute "chmod -R 770 ${REMOTE_BACKUP_DIR}"
 }
 
 main() {
