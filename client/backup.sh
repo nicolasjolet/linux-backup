@@ -3,8 +3,11 @@
 ### Prerequisites :
 # 1. create a private/public key pair
 # 2. set the private key for ssh client of the user running this script. e.g. in /root/.ssh/id_rsa
-# 3. set the public key for ssh server for a backup user on the remote server (having limited rights). e.g. in /root/.ssh/authorized_keys
-# 4. set a mysql config file (~/.my.cnf) for the user running this script in order to avoid the warning message from mysqldump e.g. in /root/.my.cnf
+# 3. set the public key for ssh server for a backup user on the remote server (having limited rights). e.g. in /home/backup/.ssh/authorized_keys
+# 4. create a read only user in mysql
+# 5. set a mysql config file (~/.my.cnf) for the user running this script in order to avoid the warning message from mysqldump e.g. in /root/.my.cnf
+# 6. install 'mutt'
+# 7. create the remote directory on the backup server with only traversing rights on the root folder
 
 ##---- USER VARIABLES
 MAIL_TO=nicolas.jolet@gmail.com							# user to receive email in case of error
