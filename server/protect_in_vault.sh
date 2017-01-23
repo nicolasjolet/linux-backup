@@ -2,9 +2,12 @@
 
 ##---- USER VARIABLES
 ROOT_BACKUP_DIR="/var/backup"
-BACKUP_DIRS=( "ovh-predict-prod" "ovh-dtroc-prod" )
+BACKUP_DIRS=( "ovh-predict-prod" "ovh-dtroc-prod" "ovh-dtroc-prod-ma" )
 RETENTION_COUNT=30						# number of backup files to retain
 MAIL_TO=nicolas.jolet@gmail.com			# user to receive email in case of error
+SHOW_LOG_IN_CONSOLE=0
+NEW_FILE_WARNING_THRESHOLD=3			# if number of new file thresold is reached send email
+NEW_FILE_STOP_THRESHOLD=5				# do not continue proceed more files if this threshold is reached
 
 ##---- SCRIPT VARIABLES
 D2D_DIR_NAME="d2d"
@@ -12,8 +15,6 @@ VAULT_DIR_NAME="vault"
 BACKUP_TIME="$(date +'%Y%m%d-%H%M')"
 LOG_FILE=/tmp/dW5pcXVlaWRmb3J2YXVsdGJhY2t1cC0t-vaultbackup.log
 ((RETENTION_COUNT++))					# need to add 1 to variable to be inline with tail
-SHOW_LOG_IN_CONSOLE=1
-
 
 ##---- FUNCTIONS
 error_exist_in_log() {
@@ -85,7 +86,7 @@ is_dir_empty() {
 	! find "$1" -mindepth 1 -print -quit | grep -q .
 }
 
-#1: path to process
+#1: path to proceed
 save_to_vault() {
 	local d2d_path="$ROOT_BACKUP_DIR/$D2D_DIR_NAME/$1"
 	local vault_path="$ROOT_BACKUP_DIR/$VAULT_DIR_NAME/$1"
@@ -94,7 +95,8 @@ save_to_vault() {
 	echo "to $vault_path"
 	
 	local file
-	# loop through files in backup d2d matching pattern
+	local new_file_count=0
+	# loop through files in d2d backup folder matching pattern
 	ls -1 "$d2d_path" | grep -P '\d{8}-\d{4}--(.+).gz' |
 		while read file; do
 			# check if file is not corrupted
@@ -110,11 +112,13 @@ save_to_vault() {
 			echo "Moving $d2d_path/$file to $vault_path/$file_name/$file"
 			mkdir -p "$vault_path/$file_name"
 			mv "$d2d_path/$file" "$vault_path/$file_name/$file"
-			[[ $? -ne 0 ]] && echo_err "Cannot move this file to vault"
+			[[ $? -ne 0 ]] && echo_err "Cannot move this file to vault" || ((new_file_count++))
+			[[ new_file_count -eq $NEW_FILE_WARNING_THRESHOLD ]] && echo_err "NEW_FILE_WARNING_THRESHOLD : Lot of new files were added"
+			[[ new_file_count -ge $NEW_FILE_STOP_THRESHOLD ]] && echo_err "NEW_FILE_STOP_THRESHOLD : Lot of new files were added. Stop processing!" && break
 		done
 }
 
-#1: path to process
+#1: path to proceed
 housekeeping() {
 	local vault_path="$ROOT_BACKUP_DIR/$VAULT_DIR_NAME/$1"
 	
