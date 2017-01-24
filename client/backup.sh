@@ -11,7 +11,7 @@
 
 ##---- USER VARIABLES
 MAIL_TO=nicolas.jolet@gmail.com							# user to receive email in case of error
-MYSQL_USER=backup										# mysql user to save database
+MYSQL_USER=backup										# mysql user to save database. Empty to skip mysql backup
 FOLDERS_TO_BACKUP=( "/root/scripts" "/etc" )			# array of folders to backup. Empty array if no folder to backup
 BACKUP_HOST=88.198.19.3									# hetzner-predict-dev
 REMOTE_BACKUP_USER=backup								# see prerequisites.3
@@ -158,7 +158,8 @@ main() {
 		
 		create_remote_d2d_repo
 		
-		save_mysql
+		# save mysql DBs unless user is empty
+		[[ -z $MYSQL_USER ]] || save_mysql
 
 		for f in "${FOLDERS_TO_BACKUP[@]}"; do
 			save_directory "$f"
