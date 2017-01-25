@@ -1,0 +1,18 @@
+### Prerequisites :
+# 1. create a private/public key pair for root user
+# 2. set the private key for ssh client of the user running this script. e.g. in /root/.ssh/id_rsa
+# 3. set the public key for ssh server for a backup user on the remote server (having limited rights). e.g. in /home/backup/.ssh/authorized_keys
+# 4. create a read only user in mysql
+# 5. set a mysql config file (~/.my.cnf) for the user running this script in order to avoid the warning message from mysqldump e.g. in /root/.my.cnf
+# 6. install 'mutt' to server emails
+# 7. create the remote directory on the backup server with only traversing rights on the root folder for the backup user
+
+HOST_NAME=hostname
+MAIL_TO=mail@mail.com									# user to receive email in case of error
+MYSQL_USER=backup										# mysql user to save database. Empty to skip mysql backup
+FOLDERS_TO_BACKUP=( "/etc" )							# array of folders to backup. Empty array if no folder to backup
+BACKUP_HOST=1.2.3.4										# vault backup server
+REMOTE_BACKUP_USER=backup								# see prerequisites.3
+
+REMOTE_BACKUP_DIR=/var/backup/d2d/$HOST_NAME
+SHOW_LOG_IN_CONSOLE=0
