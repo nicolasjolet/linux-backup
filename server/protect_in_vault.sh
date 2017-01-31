@@ -84,37 +84,31 @@ is_dir_empty() {
 save_to_vault() {
 	local d2d_path="$ROOT_BACKUP_DIR/$D2D_DIR_NAME/$1"
 	local vault_path="$ROOT_BACKUP_DIR/$VAULT_DIR_NAME/$1"
-	# local matching_pattern='\d{8}-\d{4}--(.+)\.gz'
-	local match_var=.+?
-	local matching_pattern="(?<=\d{8}-\d{4}--)${match_var}(?=(\.tar)?\.gz)"
 	
 	echo "saving $d2d_path"
 	echo "to $vault_path"
 	
 	local item_with_count
 	# get each item to save in vault with count	
-	ls -1 "$d2d_path" | grep -Po "$matching_pattern" | sort | uniq -c | 
+	ls -1 "$d2d_path" | grep -Po "(?<=\d{8}-\d{4}--).+?(?=(\.tar)?\.gz)" | sort | uniq -c | 
 		while read item_with_count; do
 			echo "Processing $item_with_count"
 			
 			# split count and item name
-#			local item_count=$(echo "$item_with_count" | cut -c-7 | tr -d '[:space:]')
 			local item_count=$(grep -Po '^\d+' <<< "$item_with_count")
-#			local item_name=$(echo "$item_with_count" | cut -c9-)
 			local item_name=$(grep -Po '[^ ]*$' <<< "$item_with_count")
 			
 			# check if count is not reaching nor exceeding the thresholds
 			if [[ $item_count -eq $NEW_FILE_WARNING_THRESHOLD ]]; then
-				echo_err "NEW_FILE_WARNING_THRESHOLD : Lot of {${item_name}} were added"
+				echo_err "NEW_FILE_WARNING_THRESHOLD : ${item_name}"
 			elif [[ $item_count -ge $NEW_FILE_STOP_THRESHOLD ]]; then
-				echo_err "NEW_FILE_STOP_THRESHOLD : Lot of {${item_name}} were added. Stop processing!"
+				echo_err "NEW_FILE_STOP_THRESHOLD : ${item_name}. Stop processing!"
 				continue;
 			fi
 			
 			# processing this item
-			match_var=$item_name
 			local file
-			ls -1 "$d2d_path" | grep -P "$matching_pattern" |
+			ls -1 "$d2d_path" | grep -P "(?<=\d{8}-\d{4}--)${item_name}(?=(\.tar)?\.gz)" |
 				while read file; do
 					# check if file is not corrupted
 					if ! gzip -t "$d2d_path/$file"; then
