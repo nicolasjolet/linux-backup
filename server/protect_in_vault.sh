@@ -99,9 +99,9 @@ save_to_vault() {
 			
 			# split count and item name
 #			local item_count=$(echo "$item_with_count" | cut -c-7 | tr -d '[:space:]')
-			local item_count=$(grep -Po '^(?<=\s*)\d+' <<< "$item_with_count")
+			local item_count=$(grep -Po '^\d+' <<< "$item_with_count")
 #			local item_name=$(echo "$item_with_count" | cut -c9-)
-			local item_name=$(grep -Po '^(?<=\s*\d+\s).*' <<< "$item_with_count")
+			local item_name=$(grep -Po '[^ ]*$' <<< "$item_with_count")
 			
 			# check if count is not reaching nor exceeding the thresholds
 			if [[ $item_count -eq $NEW_FILE_WARNING_THRESHOLD ]]; then
