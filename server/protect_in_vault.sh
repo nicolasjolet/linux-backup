@@ -84,31 +84,47 @@ is_dir_empty() {
 save_to_vault() {
 	local d2d_path="$ROOT_BACKUP_DIR/$D2D_DIR_NAME/$1"
 	local vault_path="$ROOT_BACKUP_DIR/$VAULT_DIR_NAME/$1"
+	# local matching_pattern='\d{8}-\d{4}--(.+)\.gz'
+	local match_var='.+?'
+	local matching_pattern='(?<=\d{8}-\d{4}--)${match_var}(?=(\.tar)?\.gz)'
 	
 	echo "saving $d2d_path"
 	echo "to $vault_path"
 	
-	local file
-	local new_file_count=0
-	# loop through files in d2d backup folder matching pattern
-	ls -1 "$d2d_path" | grep -P '\d{8}-\d{4}--(.+).gz' |
-		while read file; do
-			# check if file is not corrupted
-			if ! gzip -t "$d2d_path/$file"; then
-				echo_err "file corrupted: $d2d_path/$file"
-				continue
+	local item_with_count
+	# get each item to save in vault with count	
+	ls -1 "$d2d_path" | grep -Po $matching_pattern | sort | uniq -c | 
+		while read item_with_count; do
+			# split count and item name
+			local item_count=$(echo $item_with_count | cut -c-7 | tr -d '[:space:]')
+			local item_name=$(echo $item_with_count | cut -c9-)
+			
+			# check if count is not reaching nor exceeding the thresholds
+			if [[ $item_count -eq $NEW_FILE_WARNING_THRESHOLD ]]; then
+				echo_err "NEW_FILE_WARNING_THRESHOLD : Lot of {${item_name}} were added"
+			elif [[ $item_count -ge $NEW_FILE_STOP_THRESHOLD ]]; then
+				echo_err "NEW_FILE_STOP_THRESHOLD : Lot of {${item_name}} were added. Stop processing!"
+				continue;
 			fi
 			
-			# get the file name stripped of date info
-			local file_name=$(grep -Po '(?<=\d{8}-\d{4}--).+?(?=(\.tar)?.gz)' <<< "$file")
-			
-			# move it to vault (ensure path exists)
-			echo "Moving $d2d_path/$file to $vault_path/$file_name/$file"
-			mkdir -p "$vault_path/$file_name"
-			mv "$d2d_path/$file" "$vault_path/$file_name/$file"
-			[[ $? -ne 0 ]] && echo_err "Cannot move this file to vault" || ((new_file_count++))
-			[[ new_file_count -eq $NEW_FILE_WARNING_THRESHOLD ]] && echo_err "NEW_FILE_WARNING_THRESHOLD : Lot of new files were added"
-			[[ new_file_count -ge $NEW_FILE_STOP_THRESHOLD ]] && echo_err "NEW_FILE_STOP_THRESHOLD : Lot of new files were added. Stop processing!" && break
+			# processing this item
+			match_var="$item_name"
+			local file
+			ls -1 "$d2d_path" | grep -P $matching_pattern |
+				while read file; do
+					# check if file is not corrupted
+					if ! gzip -t "$d2d_path/$file"; then
+						echo_err "file corrupted: $d2d_path/$file"
+						rm -f "$d2d_path/$file"
+						continue
+					fi
+					
+					# move it to vault (ensure path exists)
+					echo "Moving $d2d_path/$file to $vault_path/$item_name/$file"
+					mkdir -p "$vault_path/$item_name"
+					mv "$d2d_path/$file" "$vault_path/$item_name/$file"
+					[[ $? -ne 0 ]] && echo_err "Cannot move this file to vault"
+				done
 		done
 }
 
