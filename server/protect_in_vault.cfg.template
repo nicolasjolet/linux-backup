@@ -1,0 +1,9 @@
+##---- USER VARIABLES
+ROOT_BACKUP_DIR="/var/backup"
+BACKUP_DIRS=( "dir1" "dir2" )			# name of folders to protect
+RETENTION_COUNT=30						# number of backup files to retain
+MAIL_TO=mail@mail.com					# user to receive email in case of error
+NEW_FILE_WARNING_THRESHOLD=3			# send email if number of new file thresold is reached
+NEW_FILE_STOP_THRESHOLD=5				# do not continue proceeding more files if threshold is reached
+
+SHOW_LOG_IN_CONSOLE=0

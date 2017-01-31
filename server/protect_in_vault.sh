@@ -1,13 +1,7 @@
 #!/bin/bash
 
 ##---- USER VARIABLES
-ROOT_BACKUP_DIR="/var/backup"
-BACKUP_DIRS=( "ovh-predict-prod" "ovh-dtroc-prod" "ovh-dtroc-prod-ma" )
-RETENTION_COUNT=30						# number of backup files to retain
-MAIL_TO=nicolas.jolet@gmail.com			# user to receive email in case of error
-SHOW_LOG_IN_CONSOLE=0
-NEW_FILE_WARNING_THRESHOLD=3			# if number of new file thresold is reached send email
-NEW_FILE_STOP_THRESHOLD=5				# do not continue proceed more files if this threshold is reached
+. $(dirname $0)/protect_in_vault.cfg
 
 ##---- SCRIPT VARIABLES
 D2D_DIR_NAME="d2d"
